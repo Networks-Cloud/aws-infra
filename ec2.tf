@@ -60,7 +60,7 @@ resource "aws_instance" "my-ec2-instance" {
   vpc_security_group_ids = [aws_security_group.ec2-security-group.id]
   subnet_id              = aws_subnet.public[0].id
   key_name               = "ec2"
-  iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
+  iam_instance_profile   = aws_iam_instance_profile.webapp_s3_instance_profile.name
 
   security_groups = [
     aws_security_group.ec2-security-group.id

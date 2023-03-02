@@ -1,5 +1,7 @@
-resource "aws_iam_policy" "my_policy" {
-  name = "my-iam-policy"
+resource "aws_iam_policy" "webapp_s3" {
+  name        = "webapp_s3_policy"
+  description = "Allows EC2 instances to perform S3 operations on the WebAppS3 bucket"
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -7,22 +9,21 @@ resource "aws_iam_policy" "my_policy" {
         Effect = "Allow"
         Action = [
           "s3:Get*",
-          "s3:Put*",
           "s3:List*",
-          "s3:Write*"
+          "s3:Put*",
+          "s3:Delete*"
         ]
-        Resource = [
-          "arn:aws:s3:::${aws_s3_bucket.private_bucket.arn}",
-          "arn:aws:s3:::${aws_s3_bucket.private_bucket.arn}/*"
+        Resource: [
+          aws_s3_bucket.private_bucket.arn,
+          "${aws_s3_bucket.private_bucket.arn}/*"
         ]
       }
     ]
   })
 }
 
-
-resource "aws_iam_role" "ec2_role" {
-  name = "ec2_role"
+resource "aws_iam_role" "webapp_s3_role" {
+  name = "EC2-CSYE6225"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -30,23 +31,21 @@ resource "aws_iam_role" "ec2_role" {
       {
         Action = "sts:AssumeRole"
         Effect = "Allow"
-        Sid    = ""
         Principal = {
           Service = "ec2.amazonaws.com"
         }
-      },
+      }
     ]
   })
 }
 
+resource "aws_iam_instance_profile" "webapp_s3_instance_profile" {
+  name = "EC2-CSYE6225_profile"
 
-resource "aws_iam_policy_attachment" "ec2_policy_role" {
-  name       = "ec2_attachment"
-  roles      = [aws_iam_role.ec2_role.name]
-  policy_arn = aws_iam_policy.my_policy.arn
+  role = aws_iam_role.webapp_s3_role.name
 }
 
-resource "aws_iam_instance_profile" "ec2_profile" {
-  name = "ec2_profile"
-  role = aws_iam_role.ec2_role.name
+resource "aws_iam_role_policy_attachment" "webapp_s3_policy_attachment" {
+  policy_arn = aws_iam_policy.webapp_s3.arn
+  role       = aws_iam_role.webapp_s3_role.name
 }
