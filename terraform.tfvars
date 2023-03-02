@@ -1,4 +1,6 @@
-ami_name="ami-01225e50503bd0e6a"
+ami_name="ami-0475d4f68c04c1828"
 inst_region="us-east-1"
 profile="dev"
 vpc_name="vpc-1"
+db_username="csye6225"
+db_password="Vish!l9757"
