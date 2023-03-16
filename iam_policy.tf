@@ -9,7 +9,6 @@ resource "aws_iam_policy" "webapp_s3" {
         Effect = "Allow"
         Action = [
           "s3:Get*",
-          "s3:List*",
           "s3:Put*",
           "s3:Delete*"
         ]
