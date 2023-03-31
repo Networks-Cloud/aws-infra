@@ -1,4 +1,4 @@
-ami_name="ami-08cb54ff825102c4f"
+ami_name="ami-0c496702c029833da"
 inst_region="us-east-1"
 profile="dev"
 vpc_name="vpc-1"
