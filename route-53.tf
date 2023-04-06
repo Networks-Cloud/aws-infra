@@ -10,9 +10,11 @@ resource "aws_route53_record" "example" {
   zone_id = var.zone_id
   name    = var.domain
   type    = "A"
-  ttl     = "60"
 
-  records = [
-    aws_instance.my-ec2-instance.public_ip
-  ]
+  alias {
+    name                   = aws_lb.lb.dns_name
+    zone_id                = aws_lb.lb.zone_id
+    evaluate_target_health = true
+  }
+
 }
