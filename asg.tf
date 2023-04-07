@@ -65,7 +65,7 @@ resource "aws_autoscaling_group" "asg" {
 
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_policy
 
-# resource "aws_autoscaling_policy" "asg_cpu_policy" {
+# resource "aws_autoscaling_policy" "scale_up_policy" {
 
 #   name = "csye6225-asg-cpu"
 
@@ -85,9 +85,9 @@ resource "aws_autoscaling_group" "asg" {
 
 #     }
 
-#     target_value = 5.0
-
+#     target_value = 2.0
 #   }
+#   # cooldown     = 30
 
 # }
 
@@ -103,17 +103,19 @@ resource "aws_autoscaling_policy" "scale_up_policy" {
 
 resource "aws_cloudwatch_metric_alarm" "scale_up_alarm" {
   alarm_name          = "scale-up-alarm"
-  comparison_operator = "GreaterThanOrEqualToThreshold"
+  alarm_description   = "Scale Up Alarm"
+  comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
   metric_name         = "CPUUtilization"
   namespace           = "AWS/EC2"
-  period              = "10"
-  statistic           = "Average"
+  period              = "30"
+  statistic           = "Minimum"
   threshold           = "2"
-  alarm_description   = "Scale up when average CPU usage is greater than 5%"
-  #alarm_actions       = [aws_autoscaling_policy.scale_up_policy.arn]
-  alarm_actions             = ["${aws_autoscaling_policy.scale_up_policy.arn}"]
-  insufficient_data_actions = []
+  dimensions = {
+    "AutoScalingGroupName" = "${aws_autoscaling_group.asg.name}"
+  }
+  actions_enabled = true
+  alarm_actions   = ["${aws_autoscaling_policy.scale_up_policy.arn}"]
 }
 
 
@@ -122,21 +124,26 @@ resource "aws_autoscaling_policy" "scale_down_policy" {
   name                   = "scale-down-policy"
   scaling_adjustment     = -1
   adjustment_type        = "ChangeInCapacity"
-  cooldown               = 60
+  cooldown               = 30
   autoscaling_group_name = aws_autoscaling_group.asg.name
+
 }
+
 resource "aws_cloudwatch_metric_alarm" "scale_down_alarm" {
   alarm_name          = "scale-down-alarm"
-  comparison_operator = "LessThanOrEqualToThreshold"
+  alarm_description   = "Scale Down Alarm"
+  comparison_operator = "LessThanThreshold"
   evaluation_periods  = "1"
   metric_name         = "CPUUtilization"
   namespace           = "AWS/EC2"
-  period              = "60"
+  period              = "30"
   statistic           = "Average"
-  threshold           = "1"
-  alarm_description   = "Scale down when average CPU usage is below 3%"
-  #alarm_actions       = [aws_autoscaling_policy.scale_down_policy.arn]
-  alarm_actions = ["${aws_autoscaling_policy.scale_down_policy.arn}"]
+  threshold           = "2"
+  dimensions = {
+    "AutoScalingGroupName" = "${aws_autoscaling_group.asg.name}"
+  }
+  actions_enabled = true
+  alarm_actions   = ["${aws_autoscaling_policy.scale_down_policy.arn}"]
 }
 
 resource "aws_autoscaling_attachment" "asg_lb_attachment" {
