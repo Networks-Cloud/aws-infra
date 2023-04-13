@@ -114,6 +114,8 @@ resource "aws_launch_template" "ec2-template" {
       volume_size           = 8
       volume_type           = "gp2"
       delete_on_termination = true
+      encrypted = true
+      kms_key_id = aws_kms_key.ec2_key.arn
     }
   }
 
